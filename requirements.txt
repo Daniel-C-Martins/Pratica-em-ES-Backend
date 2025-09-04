@@ -3,6 +3,7 @@ black==25.1.0
 click==8.2.1
 dj-database-url==3.0.1
 Django==5.2.5
+djangorestframework==3.16.1
 mypy_extensions==1.1.0
 packaging==25.0
 pathspec==0.12.1
