@@ -13,6 +13,11 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 from decouple import config, Csv
 from dj_database_url import parse as db_url
+import os
+from dotenv import load_dotenv
+from urllib.parse import urlparse, parse_qsl
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -31,16 +36,6 @@ ALLOWED_HOSTS = config("ALLOWED_HOSTS", cast=Csv())
 
 
 # Application definition
-
-INSTALLED_APPS = [
-    "django.contrib.admin",
-    "django.contrib.auth",
-    "django.contrib.contenttypes",
-    "django.contrib.sessions",
-    "django.contrib.messages",
-    "django.contrib.staticfiles",
-]
-
 DJANGO_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -50,9 +45,9 @@ DJANGO_APPS = [
     "django.contrib.staticfiles",
 ]
 
-THIRD_PARTY_APPS = []
+THIRD_PARTY_APPS = ["rest_framework"]
 
-LOCAL_APPS = []
+LOCAL_APPS = ["api.apps.ApiConfig"]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
@@ -89,13 +84,19 @@ WSGI_APPLICATION = "setup.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    "default": config(
-        "DATABASE_URL", default="sqlite:///" + str(BASE_DIR / "db.sqlite3"),
-        cast=db_url
-    )
-}
+tmpPostgres = urlparse(os.getenv("DATABASE_URL"))
 
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": tmpPostgres.path.replace("/", ""),
+        "USER": tmpPostgres.username,
+        "PASSWORD": tmpPostgres.password,
+        "HOST": tmpPostgres.hostname,
+        "PORT": 5432,
+        "OPTIONS": dict(parse_qsl(tmpPostgres.query)),
+    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
