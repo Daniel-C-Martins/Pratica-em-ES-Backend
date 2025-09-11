@@ -3,7 +3,12 @@ black==25.1.0
 click==8.2.1
 dj-database-url==3.0.1
 Django==5.2.5
+django-oauth-toolkit==3.0.1
+django-filter==25.1
+django-scalar==0.2.0
 djangorestframework==3.16.1
+djangorestframework-recursive==0.1.2
+drf-spectacular==0.28.0
 mypy_extensions==1.1.0
 packaging==25.0
 pathspec==0.12.1

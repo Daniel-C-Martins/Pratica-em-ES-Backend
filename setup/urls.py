@@ -1,23 +1,18 @@
-"""
-URL configuration for setup project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.2/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
-
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from django_scalar import views as scalar_views
+from drf_spectacular.views import SpectacularAPIView
 
 urlpatterns = [
+    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+    path("api/docs/", scalar_views.scalar_viewer, name="docs"),
     path("admin/", admin.site.urls),
+    path("api/", include("api.urls.racasPetUrls", namespace="racasPet")),
+    path("api/", include("api.urls.statusPetUrls", namespace="statusPet")),
+    path("api/", include("api.urls.tutorUrls", namespace="tutor")),
+    path("api/", include("api.urls.petUrls", namespace="pet")),
+    path("api/", include("api.urls.ongUrls", namespace="ong")),
+    path("api/", include("api.urls.adotanteUrls", namespace="adotante")),
+    path("api/", include("api.urls.adocaoUrls", namespace="adocao")),
+    path("api/", include("api.urls.eventoUrls", namespace="evento")),
 ]

@@ -47,7 +47,7 @@ DJANGO_APPS = [
 
 THIRD_PARTY_APPS = ["rest_framework"]
 
-LOCAL_APPS = ["api.apps.ApiConfig"]
+LOCAL_APPS = ["api.apps.ApiConfig", "django_scalar", "drf_spectacular"]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
@@ -96,6 +96,26 @@ DATABASES = {
         "PORT": 5432,
         "OPTIONS": dict(parse_qsl(tmpPostgres.query)),
     }
+}
+
+REST_FRAMEWORK = {
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_PAGINATION_CLASS": "api.pagination.SimpleResultsPagination",
+    "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
+}
+
+SCALAR_TITLE = "API Pet Adote"
+
+SPECTACULAR_SETTINGS = {
+    "EXTENSIONS_INFO": {
+        "drf_spectacular.contrib.rest_framework_recursive.RecursiveFieldExtension": {
+            "target_class": None,
+        },
+        "drf_spectacular.contrib.django_oauth_toolkit.DjangoOAuthToolkitScheme": {
+            "target_class": None
+        },
+    },
+    "DISABLE_ERRORS_AND_WARNINGS": True,
 }
 
 # Password validation
