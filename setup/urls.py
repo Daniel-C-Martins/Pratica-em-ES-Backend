@@ -15,4 +15,8 @@ urlpatterns = [
     path("api/", include("api.urls.adotanteUrls", namespace="adotante")),
     path("api/", include("api.urls.adocaoUrls", namespace="adocao")),
     path("api/", include("api.urls.eventoUrls", namespace="evento")),
+    path(
+        "api/",
+        include("api.urls.preferenciaAdotanteUrls", namespace="preferenciaAdotante"),
+    ),
 ]

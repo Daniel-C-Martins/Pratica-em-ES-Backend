@@ -7,3 +7,4 @@ from .pet import Pet
 from .racasPet import RacasPet
 from .tutor import Tutor
 from .statusPet import StatusPet
+from .preferenciaAdotante import PreferenciaAdotante
