@@ -7,12 +7,20 @@ from api.models.ong import Ong
 from api.models.tutor import Tutor
 
 
+class IdadePet(models.IntegerChoices):
+    FILHOTE = 1, "Filhote"
+    ADULTO = 2, "Adulto"
+    IDOSO = 3, "Idoso"
+
+
 class Pet(models.Model):
     id_pet = models.AutoField(db_column="id_pet", primary_key=True)
 
     nome = models.CharField(db_column="nome", max_length=100, blank=False, null=False)
 
-    idade = models.IntegerField(db_column="idade", blank=False, null=False)
+    idade = models.IntegerField(
+        db_column="idade", blank=False, null=False, choices=IdadePet.choices
+    )
 
     porte = models.CharField(db_column="porte", max_length=50, blank=False, null=False)
 
