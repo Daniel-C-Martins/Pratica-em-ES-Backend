@@ -1,5 +1,5 @@
 from api.models.adocao import Adocao
-from api.serialiazers.adocaoSerializer import (
+from api.serializers.adocaoSerializer import (
     AdocaoReadSerializer,
     AdocaoWriteSerializer,
 )
@@ -7,9 +7,13 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 
 
 class AdocaoView(APIView):
+
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
     def get(self, request):
         try:
             adocoes = Adocao.objects.all()
@@ -29,6 +33,9 @@ class AdocaoView(APIView):
 
 
 class AdocaoDetailView(APIView):
+
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
     def get(self, request, pk):
         try:
             adocao = get_object_or_404(Adocao, pk=pk)

@@ -13,6 +13,13 @@ class IdadePet(models.IntegerChoices):
     IDOSO = 3, "Idoso"
 
 
+class PortePet(models.TextChoices):
+    PEQUENO = "Pequeno", "Pequeno"
+    MEDIO = "Médio", "Médio"
+    GRANDE = "Grande", "Grande"
+    MUITO_GRANDE = "Muito Grande", "Muito Grande"
+
+
 class Pet(models.Model):
     id_pet = models.AutoField(db_column="id_pet", primary_key=True)
 
@@ -22,7 +29,7 @@ class Pet(models.Model):
         db_column="idade", blank=False, null=False, choices=IdadePet.choices
     )
 
-    porte = models.CharField(db_column="porte", max_length=50, blank=False, null=False)
+    porte = models.TextField(db_column="porte", choices=PortePet.choices, blank=False)
 
     descricao = models.TextField(db_column="descricao", blank=True, null=True)
 

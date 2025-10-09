@@ -1,5 +1,5 @@
 from api.models.statusPet import StatusPet
-from api.serialiazers.statusPetSerializer import (
+from api.serializers.statusPetSerializer import (
     StatusPetReadSerializer,
     StatusPetWriteSerializer,
 )
@@ -7,9 +7,13 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 
 
 class StatusPetView(APIView):
+
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
     def get(self, request):
         try:
             status_pets = StatusPet.objects.all()
@@ -29,6 +33,9 @@ class StatusPetView(APIView):
 
 
 class StatusPetDetailView(APIView):
+
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
     def get(self, request, pk):
         try:
             status_pet = get_object_or_404(StatusPet, pk=pk)

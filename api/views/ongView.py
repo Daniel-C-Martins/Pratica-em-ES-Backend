@@ -1,5 +1,5 @@
 from api.models.ong import Ong
-from api.serialiazers.ongSerializer import (
+from api.serializers.ongSerializer import (
     OngReadSerializer,
     OngWriteSerializer,
 )
@@ -7,9 +7,13 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 
 
 class OngView(APIView):
+
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
     def get(self, request):
         try:
             ongs = Ong.objects.all()
@@ -29,6 +33,9 @@ class OngView(APIView):
 
 
 class OngDetailView(APIView):
+
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
     def get(self, request, pk):
         try:
             ong = get_object_or_404(Ong, pk=pk)

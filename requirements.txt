@@ -8,6 +8,8 @@ django-filter==25.1
 django-scalar==0.2.0
 djangorestframework==3.16.1
 djangorestframework-recursive==0.1.2
+djangorestframework_simplejwt==5.5.1
+django-cors-headers==4.8.0
 drf-spectacular==0.28.0
 mypy_extensions==1.1.0
 packaging==25.0

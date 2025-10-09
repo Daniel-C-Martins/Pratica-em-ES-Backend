@@ -1,5 +1,5 @@
 from api.models.racasPet import RacasPet
-from api.serialiazers.racasPetSerializer import (
+from api.serializers.racasPetSerializer import (
     RacasPetReadSerializer,
     RacasPetWriteSerializer,
 )
@@ -7,9 +7,13 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 
 
 class RacasPetView(APIView):
+
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
     def get(self, request):
         try:
             racas_pet = RacasPet.objects.all()
@@ -29,6 +33,9 @@ class RacasPetView(APIView):
 
 
 class RacasPetDetailView(APIView):
+
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
     def get(self, request, pk):
         try:
             racas_pet = get_object_or_404(RacasPet, pk=pk)

@@ -1,5 +1,5 @@
 from api.models.adotante import Adotante
-from api.serialiazers.adotanteSerializer import (
+from api.serializers.adotanteSerializer import (
     AdotanteReadSerializer,
     AdotanteWriteSerializer,
 )
@@ -7,9 +7,13 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 
 
 class AdotanteView(APIView):
+
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
     def get(self, request):
         try:
             adotantes = Adotante.objects.all()
@@ -29,6 +33,9 @@ class AdotanteView(APIView):
 
 
 class AdotanteDetailView(APIView):
+
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
     def get(self, request, pk):
         try:
             adotante = get_object_or_404(Adotante, pk=pk)

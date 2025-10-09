@@ -1,5 +1,5 @@
 from api.models.tutor import Tutor
-from api.serialiazers.tutorSerializer import (
+from api.serializers.tutorSerializer import (
     TutorReadSerializer,
     TutorWriteSerializer,
 )
@@ -7,9 +7,12 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 
 
 class TutorView(APIView):
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
     def get(self, request):
         try:
             tutors = Tutor.objects.all()
@@ -29,6 +32,8 @@ class TutorView(APIView):
 
 
 class TutorDetailView(APIView):
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
     def get(self, request, pk):
         try:
             tutor = get_object_or_404(Tutor, pk=pk)
