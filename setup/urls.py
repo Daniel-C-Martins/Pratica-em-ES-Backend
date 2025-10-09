@@ -10,6 +10,7 @@ urlpatterns = [
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", scalar_views.scalar_viewer, name="docs"),
     path("admin/", admin.site.urls),
+    path("api/", include("api.urls.loginUrls", namespace="login")),
     path("api/", include("api.urls.racasPetUrls", namespace="racasPet")),
     path("api/", include("api.urls.statusPetUrls", namespace="statusPet")),
     path("api/", include("api.urls.tutorUrls", namespace="tutor")),

@@ -46,7 +46,7 @@ DJANGO_APPS = [
     "django.contrib.staticfiles",
 ]
 
-THIRD_PARTY_APPS = ["rest_framework", "rest_framework_simplejwt", "corsheaders"]
+THIRD_PARTY_APPS = ["rest_framework", "rest_framework_simplejwt", "corsheaders",  "rest_framework_simplejwt.token_blacklist"]
 
 LOCAL_APPS = ["api.apps.ApiConfig", "django_scalar", "drf_spectacular"]
 
