@@ -13,7 +13,7 @@ class SignupSerializer(serializers.ModelSerializer):
         fields = [
             "email",
             "password",
-        ]  # adicione outros campos se quiser (ex.: first_name)
+        ]
 
     def validate_email(self, value):
         # Garante unicidade (se o modelo não tiver unique=True no email)
