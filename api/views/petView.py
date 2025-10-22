@@ -1,19 +1,25 @@
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from django.shortcuts import get_object_or_404
+
+from drf_spectacular.utils import extend_schema, OpenApiResponse
+
 from api.models.pet import Pet
 from api.serializers.petSerializer import (
     PetReadSerializer,
     PetWriteSerializer,
 )
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from django.shortcuts import get_object_or_404
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
 
 
 class PetView(APIView):
-
     permission_classes = [IsAuthenticated, IsAdminUser]
 
+    @extend_schema(
+        description="Lista todos os pets.",
+        responses={200: PetReadSerializer(many=True)},
+    )
     def get(self, request):
         try:
             pets = Pet.objects.all()
@@ -22,6 +28,14 @@ class PetView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+    @extend_schema(
+        description="Cria um pet.",
+        request=PetWriteSerializer,  
+        responses={
+            201: PetReadSerializer,
+            400: OpenApiResponse(description="Erro de validação"),
+        },
+    )
     def post(self, request):
         try:
             serializer = PetWriteSerializer(data=request.data)
@@ -33,9 +47,12 @@ class PetView(APIView):
 
 
 class PetDetailView(APIView):
-
     permission_classes = [IsAuthenticated, IsAdminUser]
 
+    @extend_schema(
+        description="Busca um pet pelo ID.",
+        responses={200: PetReadSerializer, 404: OpenApiResponse(description="Não encontrado")},
+    )
     def get(self, request, pk):
         try:
             pet = get_object_or_404(Pet, pk=pk)
@@ -44,6 +61,11 @@ class PetDetailView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+    @extend_schema(
+        description="Atualiza completamente um pet.",
+        request=PetWriteSerializer,  
+        responses={200: PetReadSerializer, 400: OpenApiResponse(description="Erro de validação")},
+    )
     def put(self, request, pk):
         try:
             pet = get_object_or_404(Pet, pk=pk)
@@ -54,6 +76,13 @@ class PetDetailView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+    @extend_schema(
+        description="Exclui um pet.",
+        responses={
+            204: OpenApiResponse(description="Deletado com sucesso"),
+            404: OpenApiResponse(description="Não encontrado"),
+        },
+    )
     def delete(self, request, pk):
         try:
             pet = get_object_or_404(Pet, pk=pk)
