@@ -1,19 +1,25 @@
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from django.shortcuts import get_object_or_404
+
+from drf_spectacular.utils import extend_schema, OpenApiResponse
+
 from api.models.adotante import Adotante
 from api.serializers.adotanteSerializer import (
     AdotanteReadSerializer,
     AdotanteWriteSerializer,
 )
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from django.shortcuts import get_object_or_404
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
 
 
 class AdotanteView(APIView):
-
     permission_classes = [IsAuthenticated, IsAdminUser]
 
+    @extend_schema(
+        description="Lista todos os adotantes.",
+        responses={200: AdotanteReadSerializer(many=True)},
+    )
     def get(self, request):
         try:
             adotantes = Adotante.objects.all()
@@ -22,6 +28,14 @@ class AdotanteView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+    @extend_schema(
+        description="Cria um adotante.",
+        request=AdotanteWriteSerializer,   
+        responses={
+            201: AdotanteReadSerializer,
+            400: OpenApiResponse(description="Erro de validação"),
+        },
+    )
     def post(self, request):
         try:
             serializer = AdotanteWriteSerializer(data=request.data)
@@ -33,9 +47,12 @@ class AdotanteView(APIView):
 
 
 class AdotanteDetailView(APIView):
-
     permission_classes = [IsAuthenticated, IsAdminUser]
 
+    @extend_schema(
+        description="Busca um adotante pelo ID.",
+        responses={200: AdotanteReadSerializer, 404: OpenApiResponse(description="Não encontrado")},
+    )
     def get(self, request, pk):
         try:
             adotante = get_object_or_404(Adotante, pk=pk)
@@ -44,6 +61,11 @@ class AdotanteDetailView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+    @extend_schema(
+        description="Atualiza completamente um adotante.",
+        request=AdotanteWriteSerializer,   # <- Body do PUT
+        responses={200: AdotanteReadSerializer, 400: OpenApiResponse(description="Erro de validação")},
+    )
     def put(self, request, pk):
         try:
             adotante = get_object_or_404(Adotante, pk=pk)
@@ -54,6 +76,11 @@ class AdotanteDetailView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+    @extend_schema(
+        description="Exclui um adotante.",
+        responses={204: OpenApiResponse(description="Deletado com sucesso"),
+                   404: OpenApiResponse(description="Não encontrado")},
+    )
     def delete(self, request, pk):
         try:
             adotante = get_object_or_404(Adotante, pk=pk)
