@@ -4,17 +4,37 @@ from api.models.racasPet import RacasPet
 from api.models.adotante import Adotante
 
 
+class IdadePet(models.IntegerChoices):
+    FILHOTE = 1, "Filhote"
+    ADULTO = 2, "Adulto"
+    IDOSO = 3, "Idoso"
+    INDIFERENTE = 4, "Indiferente"
+
+
+class PortePet(models.IntegerChoices):
+    PEQUENO = 1, "Pequeno"
+    MEDIO = 2, "Médio"
+    GRANDE = 3, "Grande"
+    MUITO_GRANDE = 4, "Muito Grande"
+    INDIFERENTE = 5, "Indiferente"
+
+
+class SexoPet(models.IntegerChoices):
+    M = 1, "Macho"
+    F = 2, "Fêmea"
+
+
 class PreferenciaAdotante(models.Model):
-    preferencia_porte = models.CharField(
-        db_column="preferencia_porte", max_length=50, blank=True, null=True
+    preferencia_porte = models.IntegerField(
+        db_column="preferencia_porte", choices=PortePet.choices, blank=True, null=True
     )
 
-    preferencia_idade = models.CharField(
-        db_column="preferencia_idade", max_length=50, blank=True, null=True
+    preferencia_idade = models.IntegerField(
+        db_column="preferencia_idade", choices=IdadePet.choices, blank=True, null=True
     )
 
-    preferencia_sexo = models.CharField(
-        db_column="preferencia_sexo", max_length=10, blank=True, null=True
+    preferencia_sexo = models.IntegerField(
+        db_column="preferencia_sexo", choices=SexoPet.choices, blank=True, null=True
     )
 
     aceita_doenca_cronica = models.BooleanField(

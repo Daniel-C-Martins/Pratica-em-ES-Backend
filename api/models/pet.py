@@ -5,19 +5,26 @@ from api.models.especiePet import EspeciePet
 from api.models.statusPet import StatusPet
 from api.models.ong import Ong
 from api.models.tutor import Tutor
+from api.models.racasPet import RacasPet
 
 
 class IdadePet(models.IntegerChoices):
     FILHOTE = 1, "Filhote"
     ADULTO = 2, "Adulto"
     IDOSO = 3, "Idoso"
+    INDIFERENTE = 4, "Indiferente"
 
 
-class PortePet(models.TextChoices):
-    PEQUENO = "Pequeno", "Pequeno"
-    MEDIO = "Médio", "Médio"
-    GRANDE = "Grande", "Grande"
-    MUITO_GRANDE = "Muito Grande", "Muito Grande"
+class PortePet(models.IntegerChoices):
+    PEQUENO = 1, "Pequeno"
+    MEDIO = 2, "Médio"
+    GRANDE = 3, "Grande"
+    MUITO_GRANDE = 4, "Muito Grande"
+
+
+class SexoPet(models.IntegerChoices):
+    M = 1, "Macho"
+    F = 2, "Fêmea"
 
 
 class Pet(models.Model):
@@ -29,11 +36,17 @@ class Pet(models.Model):
         db_column="idade", blank=False, null=False, choices=IdadePet.choices
     )
 
-    porte = models.TextField(db_column="porte", choices=PortePet.choices, blank=False)
+    porte = models.IntegerField(
+        db_column="porte", choices=PortePet.choices, blank=False, null=False
+    )
 
     descricao = models.TextField(db_column="descricao", blank=True, null=True)
 
     foto = models.TextField(db_column="foto", blank=True, null=True)
+
+    sexo = models.IntegerField(
+        db_column="sexo", blank=False, null=False, choices=SexoPet.choices, default=2
+    )
 
     doenca_cronica = models.BooleanField(
         db_column="doenca_cronica", blank=False, null=False, default=False
@@ -62,6 +75,10 @@ class Pet(models.Model):
     ong = models.ForeignKey(to=Ong, blank=True, null=True, on_delete=models.PROTECT)
 
     tutor = models.ForeignKey(to=Tutor, blank=True, null=True, on_delete=models.PROTECT)
+
+    raca = models.ForeignKey(
+        to=RacasPet, blank=False, null=False, on_delete=models.PROTECT, default=1
+    )
 
     class Meta:
         db_table = "pet"

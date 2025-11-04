@@ -13,7 +13,5 @@ class Adotante(models.Model):
 
     telefone = models.CharField(db_column="telefone", max_length=15, blank=False)
 
-    
-
     class Meta:
         db_table = "adotante"
