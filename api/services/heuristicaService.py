@@ -1,5 +1,5 @@
 from api.models.pet import Pet
-from api.models.statusPet import StatusPet
+from api.models.statusPet import StatusPet, Status
 from api.models.preferenciaAdotante import PreferenciaAdotante
 from api.models.adotante import Adotante
 from django.db.models import Case, When, Value, F
@@ -22,7 +22,7 @@ class HeuristicaService:
             print("Preferências do adotante não encontradas ou inativas.")
             return []
         
-        status_pet_disponivel = StatusPet.objects.get(status=StatusPet.DISPONIVEL)
+        status_pet_disponivel = StatusPet.objects.get(status=Status.DISPONIVEL)
 
         filtros = {"especie": preferencias.preferencia_especie, "status_pet": status_pet_disponivel}
 
@@ -49,79 +49,48 @@ class HeuristicaService:
 
         print(f"Filtros aplicados: {filtros}")
 
-        porte = [
-            When(porte=preferencias.preferencia_porte, then=Value(40)),
-        ]
-        if preferencias.preferencia_porte == "Médio":
-            porte.append(When(porte__in=["Pequeno", "Grande"], then=Value(15)))
-        elif preferencias.preferencia_porte in ["Pequeno", "Grande"]:
-            porte.append(When(porte="Médio", then=Value(15)))
-        elif preferencias.preferencia_porte == "Muito Grande":
-            porte.append(When(porte="Grande", then=Value(15)))
-
-        porte_score = Case(*porte, default=Value(0), output_field=IntegerField())
-
-        idade = [
-            When(idade=preferencias.preferencia_idade, then=Value(40)),
-        ]
-        if preferencias.preferencia_idade == 2:
-            idade.append(When(idade__in=[1, 3], then=Value(15)))
-        elif preferencias.preferencia_idade in [1, 3]:
-            idade.append(When(idade=2, then=Value(15)))
-
-        idade_score = Case(*idade, default=Value(0), output_field=IntegerField())
-
-        sexo_score = Value(0, output_field=IntegerField())
-        if hasattr(Pet, "sexo"):
-            sexo_score = Case(
-                When(sexo=preferencias.preferencia_sexo, then=Value(20)),
-                default=Value(0),
-                output_field=IntegerField(),
-            )
-
-        raca_score = Value(0, output_field=IntegerField())
-        if hasattr(Pet, "raca"):
-            raca_score = Case(
-                When(raca=preferencias.preferencia_raca, then=Value(20)),
-                default=Value(0),
-                output_field=IntegerField(),
-            )
-
-        boost_score = Value(0)
-        boost_score += Case(
-            When(necessidades_especiais=True, then=Value(10)),
-            default=Value(0),
-            output_field=IntegerField(),
-        )
-        boost_score += Case(
-            When(doenca_cronica=True, then=Value(10)),
-            default=Value(0),
-            output_field=IntegerField(),
-        )
-        boost_score += Case(
-            When(cuidados_constantes=True, then=Value(10)),
-            default=Value(0),
-            output_field=IntegerField(),
-        )
+        pets_filtrados = Pet.objects.filter(**filtros)
         
-        pets_query = (Pet.objects.filter(**filtros))
-
-        # pets_query = (
-        #     Pet.objects.filter(**filtros)
-        #     .annotate(
-        #         score_bruto=(
-        #             porte_score + idade_score + sexo_score + raca_score + boost_score
-        #         ),
-        #         score=(F("score_bruto") * 100.0 / Value(max_score)),
-        #     )
-        #     .order_by("-score")
-        # )
-
-        top_pets = pets_query[:50]
-        print(f"Total de pets encontrados: {pets_query.count()}")
+        
         pets_pontuados = []
-        for pet in top_pets:
-            print(f"Pet ID: {pet.id_pet}, Score: {pet.score}")
-            pets_pontuados.append({"pet": pet, "score": round(pet.score, 2)})
+        for pet in pets_filtrados:
+            score = 0
+            
+            if preferencias.preferencia_porte == pet.porte:
+                score += 40
+            elif preferencias.preferencia_porte == 'Médio' and pet.porte in ['Pequeno', 'Grande']:
+                score += 15
+            elif preferencias.preferencia_porte in ['Pequeno', 'Grande'] and pet.porte == 'Médio':
+                score += 15
+            elif preferencias.preferencia_porte == 'Muito Grande' and pet.porte == 'Grande':
+                score += 15
 
-        return pets_pontuados
+            if preferencias.preferencia_idade == pet.idade:
+                score += 40
+            if preferencias.preferencia_idade == 2 and pet.idade in [1, 3]:
+                score += 15
+            if preferencias.preferencia_idade in [1, 3] and pet.idade == 2:
+                score += 15
+            
+            if preferencias.preferencia_sexo == pet.sexo:
+                score += 20
+            
+            if preferencias.preferencia_raca == pet.raca: # Precisa melhorar essa parte para considerar raças similares
+                score += 20
+            
+            # Boost para pets com necessidades especiais ou doenças crônicas quando o adotante aceita
+            if pet.necessidades_especiais:
+                score += 10
+            if pet.doenca_cronica:
+                score += 10
+            if pet.cuidados_constantes:
+                score += 10
+
+            # normaliza a pontuação
+            score = score / max_score * 100
+
+            pets_pontuados.append({"pet": pet, "score": score})
+        
+        pets_ordenados = sorted(pets_pontuados, key=lambda p: p['score'], reverse=True)
+        
+        return pets_ordenados
