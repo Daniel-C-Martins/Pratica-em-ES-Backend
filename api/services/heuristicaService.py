@@ -1,4 +1,5 @@
 from api.models.pet import Pet
+from api.models.statusPet import StatusPet
 from api.models.preferenciaAdotante import PreferenciaAdotante
 from api.models.adotante import Adotante
 from django.db.models import Case, When, Value, F
@@ -10,6 +11,7 @@ class HeuristicaService:
         try:
             adotante = Adotante.objects.get(id=id_adotante)
         except Adotante.DoesNotExist:
+            print("Adotante não encontrado.")
             return []
 
         preferencias = PreferenciaAdotante.objects.filter(
@@ -17,26 +19,35 @@ class HeuristicaService:
         ).first()
 
         if not preferencias:
+            print("Preferências do adotante não encontradas ou inativas.")
             return []
+        
+        status_pet_disponivel = StatusPet.objects.get(status=StatusPet.DISPONIVEL)
 
-        filtros = {"especie": preferencias.preferencia_especie, "status_pet": 1}
+        filtros = {"especie": preferencias.preferencia_especie, "status_pet": status_pet_disponivel}
 
         max_score = 150
 
         if not preferencias.possui_tempo:
             filtros["cuidados_constantes"] = False
             max_score -= 10
+            print("Filtro de cuidados constantes aplicado.")
 
         if not preferencias.aceita_doenca_cronica:
             filtros["doenca_cronica"] = False
             max_score -= 10
+            print("Filtro de doença crônica aplicado.")
 
         if preferencias.possui_outros_animais:
             filtros["amigavel_outros_animais"] = True
+            print("Filtro de amigável com outros animais aplicado.")
 
         if not preferencias.aceita_necessidades_especiais:
             filtros["necessidades_especiais"] = False
             max_score -= 10
+            print("Filtro de necessidades especiais aplicado.")
+
+        print(f"Filtros aplicados: {filtros}")
 
         porte = [
             When(porte=preferencias.preferencia_porte, then=Value(40)),
@@ -92,20 +103,22 @@ class HeuristicaService:
             default=Value(0),
             output_field=IntegerField(),
         )
+        
+        pets_query = (Pet.objects.filter(**filtros))
 
-        pets_query = (
-            Pet.objects.filter(**filtros)
-            .annotate(
-                score_bruto=(
-                    porte_score + idade_score + sexo_score + raca_score + boost_score
-                ),
-                score=(F("score_bruto") * 100.0 / Value(max_score)),
-            )
-            .order_by("-score")
-        )
+        # pets_query = (
+        #     Pet.objects.filter(**filtros)
+        #     .annotate(
+        #         score_bruto=(
+        #             porte_score + idade_score + sexo_score + raca_score + boost_score
+        #         ),
+        #         score=(F("score_bruto") * 100.0 / Value(max_score)),
+        #     )
+        #     .order_by("-score")
+        # )
 
         top_pets = pets_query[:50]
-
+        print(f"Total de pets encontrados: {pets_query.count()}")
         pets_pontuados = []
         for pet in top_pets:
             print(f"Pet ID: {pet.id_pet}, Score: {pet.score}")

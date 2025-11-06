@@ -1,7 +1,7 @@
 from django.db import models
 
 
-class StatusPet(models.IntegerChoices):
+class Status(models.IntegerChoices):
     DISPONIVEL = 1, "Disponível"
     PERDIDO = 2, "Perdido"
     FALECIDO = 3, "Falecido"
@@ -12,7 +12,7 @@ class StatusPet(models.Model):
     id_status_pet = models.AutoField(db_column="id_status_pet", primary_key=True)
 
     status = models.IntegerField(
-        db_column="status", choices=StatusPet.choices, blank=False, null=False
+        db_column="status", choices=Status.choices, blank=False, null=False
     )
 
     class Meta:

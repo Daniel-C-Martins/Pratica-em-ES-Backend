@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from django.shortcuts import get_object_or_404
 
 from drf_spectacular.utils import extend_schema, OpenApiResponse
@@ -14,7 +14,7 @@ from api.serializers.adotanteSerializer import (
 
 
 class AdotanteView(APIView):
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    permission_classes = [AllowAny]
 
     @extend_schema(
         description="Lista todos os adotantes.",
@@ -30,7 +30,7 @@ class AdotanteView(APIView):
 
     @extend_schema(
         description="Cria um adotante.",
-        request=AdotanteWriteSerializer,   
+        request=AdotanteWriteSerializer,
         responses={
             201: AdotanteReadSerializer,
             400: OpenApiResponse(description="Erro de validação"),
@@ -51,7 +51,10 @@ class AdotanteDetailView(APIView):
 
     @extend_schema(
         description="Busca um adotante pelo ID.",
-        responses={200: AdotanteReadSerializer, 404: OpenApiResponse(description="Não encontrado")},
+        responses={
+            200: AdotanteReadSerializer,
+            404: OpenApiResponse(description="Não encontrado"),
+        },
     )
     def get(self, request, pk):
         try:
@@ -63,8 +66,11 @@ class AdotanteDetailView(APIView):
 
     @extend_schema(
         description="Atualiza completamente um adotante.",
-        request=AdotanteWriteSerializer,   # <- Body do PUT
-        responses={200: AdotanteReadSerializer, 400: OpenApiResponse(description="Erro de validação")},
+        request=AdotanteWriteSerializer,  # <- Body do PUT
+        responses={
+            200: AdotanteReadSerializer,
+            400: OpenApiResponse(description="Erro de validação"),
+        },
     )
     def put(self, request, pk):
         try:
@@ -78,8 +84,10 @@ class AdotanteDetailView(APIView):
 
     @extend_schema(
         description="Exclui um adotante.",
-        responses={204: OpenApiResponse(description="Deletado com sucesso"),
-                   404: OpenApiResponse(description="Não encontrado")},
+        responses={
+            204: OpenApiResponse(description="Deletado com sucesso"),
+            404: OpenApiResponse(description="Não encontrado"),
+        },
     )
     def delete(self, request, pk):
         try:
