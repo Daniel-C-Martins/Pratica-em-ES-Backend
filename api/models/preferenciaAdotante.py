@@ -22,6 +22,7 @@ class PortePet(models.IntegerChoices):
 class SexoPet(models.IntegerChoices):
     M = 1, "Macho"
     F = 2, "Fêmea"
+    INDIFERENTE = 3, "Indiferente"
 
 
 class PreferenciaAdotante(models.Model):
