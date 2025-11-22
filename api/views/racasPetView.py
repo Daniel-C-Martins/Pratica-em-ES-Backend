@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from django.shortcuts import get_object_or_404
 
 from drf_spectacular.utils import (
@@ -19,7 +19,7 @@ from api.serializers.racasPetSerializer import (
 
 
 class RacasPetView(APIView):
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    permission_classes = [AllowAny]
 
     @extend_schema(
         description="Lista todas as raças de pet.",
@@ -65,7 +65,7 @@ class RacasPetView(APIView):
 
 
 class RacasPetDetailView(APIView):
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    permission_classes = [AllowAny]
 
     @extend_schema(
         description="Busca uma raça de pet pelo ID.",
