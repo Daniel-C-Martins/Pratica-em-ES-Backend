@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from django.shortcuts import get_object_or_404
 
-from drf_spectacular.utils import extend_schema, OpenApiResponse
+from drf_spectacular.utils import extend_schema, OpenApiResponse, OpenApiParameter, OpenApiTypes
 
 from api.models.pet import Pet
 from api.serializers.petSerializer import (
@@ -19,7 +19,37 @@ class PetView(APIView):
 
     @extend_schema(
         description="Lista todos os pets.",
-        responses={200: PetReadSerializer(many=True)},
+    parameters=[
+        OpenApiParameter(
+            name="especie",
+            type=OpenApiTypes.STR,
+            location=OpenApiParameter.QUERY,
+            required=False,
+            description="Filtra pela espécie do pet",
+        ),
+        OpenApiParameter(
+            name="raca",
+            type=OpenApiTypes.STR,
+            location=OpenApiParameter.QUERY,
+            required=False,
+            description="Filtra pela raça do pet",
+        ),
+        OpenApiParameter(
+            name="porte",
+            type=OpenApiTypes.STR,
+            location=OpenApiParameter.QUERY,
+            required=False,
+            description="Filtra pelo porte do pet",
+        ),
+        OpenApiParameter(
+            name="sexo",
+            type=OpenApiTypes.STR,
+            location=OpenApiParameter.QUERY,
+            required=False,
+            description="Filtra pelo sexo do pet",
+        ),
+    ],
+    responses={200: PetReadSerializer(many=True)},
     )
     def get(self, request):
         try:
@@ -139,7 +169,7 @@ class PetHeuristicaView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        
+
 
 class PetPorTutorView(APIView):
     permission_classes = [IsAuthenticated, IsAdminUser]

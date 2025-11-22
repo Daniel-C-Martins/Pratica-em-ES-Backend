@@ -4,7 +4,12 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from django.shortcuts import get_object_or_404
 
-from drf_spectacular.utils import extend_schema, OpenApiResponse
+from drf_spectacular.utils import (
+    extend_schema,
+    OpenApiResponse,
+    OpenApiParameter,
+    OpenApiTypes,
+)
 
 from api.models.racasPet import RacasPet
 from api.serializers.racasPetSerializer import (
@@ -18,6 +23,15 @@ class RacasPetView(APIView):
 
     @extend_schema(
         description="Lista todas as raças de pet.",
+        parameters=[
+            OpenApiParameter(
+                name="especie",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                description="Filtra pela espécie do pet",
+            ),
+        ],
         responses={200: RacasPetReadSerializer(many=True)},
     )
     def get(self, request):
@@ -34,7 +48,7 @@ class RacasPetView(APIView):
 
     @extend_schema(
         description="Cria uma raça de pet.",
-        request=RacasPetWriteSerializer, 
+        request=RacasPetWriteSerializer,
         responses={
             201: RacasPetReadSerializer,
             400: OpenApiResponse(description="Erro de validação"),
@@ -55,7 +69,10 @@ class RacasPetDetailView(APIView):
 
     @extend_schema(
         description="Busca uma raça de pet pelo ID.",
-        responses={200: RacasPetReadSerializer, 404: OpenApiResponse(description="Não encontrado")},
+        responses={
+            200: RacasPetReadSerializer,
+            404: OpenApiResponse(description="Não encontrado"),
+        },
     )
     def get(self, request, pk):
         try:
@@ -67,8 +84,11 @@ class RacasPetDetailView(APIView):
 
     @extend_schema(
         description="Atualiza completamente uma raça de pet.",
-        request=RacasPetWriteSerializer,  
-        responses={200: RacasPetReadSerializer, 400: OpenApiResponse(description="Erro de validação")},
+        request=RacasPetWriteSerializer,
+        responses={
+            200: RacasPetReadSerializer,
+            400: OpenApiResponse(description="Erro de validação"),
+        },
     )
     def put(self, request, pk):
         try:
