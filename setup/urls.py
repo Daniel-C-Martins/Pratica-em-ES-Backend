@@ -24,4 +24,5 @@ urlpatterns = [
         "api/",
         include("api.urls.preferenciaAdotanteUrls", namespace="preferenciaAdotante"),
     ),
+    path("api/", include("api.urls.rastreioUrls", namespace="rastreio")),
 ]
