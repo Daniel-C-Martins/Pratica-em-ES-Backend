@@ -20,6 +20,7 @@ class PetScoreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Pet
         fields = [
+            "id_pet",
             "nome",
             "idade",
             "porte",
