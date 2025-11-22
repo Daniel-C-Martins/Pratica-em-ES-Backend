@@ -23,6 +23,10 @@ class RacasPetView(APIView):
     def get(self, request):
         try:
             racas_pet = RacasPet.objects.all()
+            especie = request.query_params.get("especie")
+            if especie:
+                racas_pet = racas_pet.filter(especie=especie)
+
             serializer = RacasPetReadSerializer(racas_pet, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
