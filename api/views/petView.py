@@ -24,8 +24,27 @@ class PetView(APIView):
     def get(self, request):
         try:
             pets = Pet.objects.all()
+
+            especie = request.query_params.get("especie")
+            raca = request.query_params.get("raca")
+            porte = request.query_params.get("porte")
+            sexo = request.query_params.get("sexo")
+
+            if especie:
+                pets = pets.filter(especie=especie)
+
+            if raca:
+                pets = pets.filter(raca=raca)
+
+            if porte:
+                pets = pets.filter(porte=porte)
+
+            if sexo:
+                pets = pets.filter(sexo=sexo)
+
             serializer = PetReadSerializer(pets, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
+
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
