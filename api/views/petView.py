@@ -139,3 +139,19 @@ class PetHeuristicaView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+
+class PetPorTutorView(APIView):
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    @extend_schema(
+        description="Lista todos os pets de um tutor específico.",
+        responses={200: PetReadSerializer(many=True)},
+    )
+    def get(self, request, tutor_id):
+        try:
+            pets = Pet.objects.filter(tutor_id=tutor_id)
+            serializer = PetReadSerializer(pets, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
