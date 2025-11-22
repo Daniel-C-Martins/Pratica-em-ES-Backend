@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from django.shortcuts import get_object_or_404
 
 from drf_spectacular.utils import extend_schema, OpenApiResponse
@@ -14,7 +14,7 @@ from api.serializers.especiePetSerializer import (
 
 
 class EspeciePetView(APIView):
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    permission_classes = [AllowAny]
 
     @extend_schema(
         description="Lista todas as espécies de pet.",
@@ -47,7 +47,7 @@ class EspeciePetView(APIView):
 
 
 class EspeciePetDetailView(APIView):
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    permission_classes = [AllowAny]
 
     @extend_schema(
         description="Busca uma espécie de pet pelo ID.",

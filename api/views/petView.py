@@ -1,10 +1,15 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from django.shortcuts import get_object_or_404
 
-from drf_spectacular.utils import extend_schema, OpenApiResponse, OpenApiParameter, OpenApiTypes
+from drf_spectacular.utils import (
+    extend_schema,
+    OpenApiResponse,
+    OpenApiParameter,
+    OpenApiTypes,
+)
 
 from api.models.pet import Pet
 from api.serializers.petSerializer import (
@@ -15,41 +20,41 @@ from api.serializers.petSerializer import (
 
 
 class PetView(APIView):
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    permission_classes = [AllowAny]
 
     @extend_schema(
         description="Lista todos os pets.",
-    parameters=[
-        OpenApiParameter(
-            name="especie",
-            type=OpenApiTypes.STR,
-            location=OpenApiParameter.QUERY,
-            required=False,
-            description="Filtra pela espécie do pet",
-        ),
-        OpenApiParameter(
-            name="raca",
-            type=OpenApiTypes.STR,
-            location=OpenApiParameter.QUERY,
-            required=False,
-            description="Filtra pela raça do pet",
-        ),
-        OpenApiParameter(
-            name="porte",
-            type=OpenApiTypes.STR,
-            location=OpenApiParameter.QUERY,
-            required=False,
-            description="Filtra pelo porte do pet",
-        ),
-        OpenApiParameter(
-            name="sexo",
-            type=OpenApiTypes.STR,
-            location=OpenApiParameter.QUERY,
-            required=False,
-            description="Filtra pelo sexo do pet",
-        ),
-    ],
-    responses={200: PetReadSerializer(many=True)},
+        parameters=[
+            OpenApiParameter(
+                name="especie",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                description="Filtra pela espécie do pet",
+            ),
+            OpenApiParameter(
+                name="raca",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                description="Filtra pela raça do pet",
+            ),
+            OpenApiParameter(
+                name="porte",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                description="Filtra pelo porte do pet",
+            ),
+            OpenApiParameter(
+                name="sexo",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                description="Filtra pelo sexo do pet",
+            ),
+        ],
+        responses={200: PetReadSerializer(many=True)},
     )
     def get(self, request):
         try:
