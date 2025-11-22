@@ -26,5 +26,6 @@ class PetScoreSerializer(serializers.ModelSerializer):
             "porte",
             "descricao",
             "foto",
+            "sexo",
             "score",
         ]
