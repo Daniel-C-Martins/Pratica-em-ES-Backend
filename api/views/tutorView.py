@@ -1,12 +1,16 @@
+# api/views/tutorView.py (exemplo)
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from django.shortcuts import get_object_or_404
 
+from rest_framework_simplejwt.tokens import RefreshToken
 from drf_spectacular.utils import extend_schema, OpenApiResponse
 
 from api.models.tutor import Tutor
+from api.models.user import User
+from api.serializers.authSerializer import RegisterTutorSerializer
 from api.serializers.tutorSerializer import (
     TutorReadSerializer,
     TutorWriteSerializer,
@@ -21,29 +25,23 @@ class TutorView(APIView):
         responses={200: TutorReadSerializer(many=True)},
     )
     def get(self, request):
-        try:
-            tutors = Tutor.objects.all()
-            serializer = TutorReadSerializer(tutors, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        tutors = Tutor.objects.all()
+        serializer = TutorReadSerializer(tutors, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @extend_schema(
-        description="Cria um tutor.",
-        request=TutorWriteSerializer,  # <- Body do POST
+        description="Cria um tutor (CRUD admin).",
+        request=TutorWriteSerializer,
         responses={
             201: TutorReadSerializer,
             400: OpenApiResponse(description="Erro de validação"),
         },
     )
     def post(self, request):
-        try:
-            serializer = TutorWriteSerializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = TutorWriteSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        tutor = serializer.save()
+        return Response(TutorReadSerializer(tutor).data, status=status.HTTP_201_CREATED)
 
 
 class TutorDetailView(APIView):
@@ -54,27 +52,21 @@ class TutorDetailView(APIView):
         responses={200: TutorReadSerializer, 404: OpenApiResponse(description="Não encontrado")},
     )
     def get(self, request, pk):
-        try:
-            tutor = get_object_or_404(Tutor, pk=pk)
-            serializer = TutorReadSerializer(tutor)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        tutor = get_object_or_404(Tutor, pk=pk)
+        serializer = TutorReadSerializer(tutor)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @extend_schema(
         description="Atualiza completamente um tutor.",
-        request=TutorWriteSerializer,  # <- Body do PUT
+        request=TutorWriteSerializer,
         responses={200: TutorReadSerializer, 400: OpenApiResponse(description="Erro de validação")},
     )
     def put(self, request, pk):
-        try:
-            tutor = get_object_or_404(Tutor, pk=pk)
-            serializer = TutorWriteSerializer(tutor, data=request.data)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        tutor = get_object_or_404(Tutor, pk=pk)
+        serializer = TutorWriteSerializer(tutor, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        tutor = serializer.save()
+        return Response(TutorReadSerializer(tutor).data, status=status.HTTP_200_OK)
 
     @extend_schema(
         description="Exclui um tutor.",
@@ -84,9 +76,43 @@ class TutorDetailView(APIView):
         },
     )
     def delete(self, request, pk):
-        try:
-            tutor = get_object_or_404(Tutor, pk=pk)
-            tutor.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        tutor = get_object_or_404(Tutor, pk=pk)
+        tutor.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class RegisterTutorView(APIView):
+    permission_classes = [AllowAny]
+
+    @extend_schema(
+        description="Registra um novo usuário tutor (User + Tutor) e retorna tokens JWT.",
+        request=RegisterTutorSerializer,
+        responses={
+            201: OpenApiResponse(
+                description="Usuário tutor criado com sucesso (user, perfil e tokens)."
+            ),
+            400: OpenApiResponse(description="Erro de validação"),
+        },
+    )
+    def post(self, request):
+        serializer = RegisterTutorSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        tutor = serializer.save()
+        user: User = tutor.user
+
+        refresh = RefreshToken.for_user(user)
+
+        return Response(
+            {
+                "user": {
+                    "id": user.id,
+                    "email": user.email,
+                    "role": user.role,
+                },
+                "tutor": TutorReadSerializer(tutor).data,
+                "access": str(refresh.access_token),
+                "refresh": str(refresh),
+            },
+            status=status.HTTP_201_CREATED,
+        )

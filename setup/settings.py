@@ -46,7 +46,12 @@ DJANGO_APPS = [
     "django.contrib.staticfiles",
 ]
 
-THIRD_PARTY_APPS = ["rest_framework", "rest_framework_simplejwt", "corsheaders",  "rest_framework_simplejwt.token_blacklist"]
+THIRD_PARTY_APPS = [
+    "rest_framework",
+    "rest_framework_simplejwt",
+    "corsheaders",
+    "rest_framework_simplejwt.token_blacklist",
+]
 
 LOCAL_APPS = ["api.apps.ApiConfig", "django_scalar", "drf_spectacular"]
 
@@ -125,6 +130,8 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
+
+AUTH_USER_MODEL = "api.User"
 
 
 # Simple JWT settings

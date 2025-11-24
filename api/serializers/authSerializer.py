@@ -1,37 +1,82 @@
-from django.contrib.auth import get_user_model
-from django.contrib.auth.hashers import check_password
+# api/serializers/authSerializer.py
 from rest_framework import serializers
-from rest_framework.exceptions import AuthenticationFailed
-from rest_framework_simplejwt.tokens import RefreshToken
 
-User = get_user_model()
+from api.models.user import User
+from api.models.adotante import Adotante
+from api.models.tutor import Tutor
+from api.models.ong import Ong
 
-class EmailLoginSerializer(serializers.Serializer):
+
+class RegisterAdotanteSerializer(serializers.Serializer):
+    # dados de login
     email = serializers.EmailField()
-    password = serializers.CharField(write_only=True)
+    password = serializers.CharField(write_only=True, min_length=6)
 
-    def validate(self, attrs):
-        email = attrs.get("email", "").strip().lower()
-        password = attrs.get("password", "")
+    # dados do perfil Adotante
+    nome = serializers.CharField(max_length=100)
+    telefone = serializers.CharField(max_length=15)
 
-        try:
-            user = User.objects.get(email__iexact=email)
-        except User.DoesNotExist:
-            raise AuthenticationFailed("No active account found with the given credentials")
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Já existe um usuário com esse e-mail.")
+        return value
 
-        if not user.is_active:
-            raise AuthenticationFailed("User inactive or deleted")
+    def create(self, validated_data):
+        email = validated_data.pop("email")
+        password = validated_data.pop("password")
 
-        if not check_password(password, user.password):
-            raise AuthenticationFailed("No active account found with the given credentials")
+        user = User.objects.create_user(
+            email=email,
+            password=password,
+            role=User.Role.ADOTANTE,
+        )
 
-        # Gera tokens. Se quiser claims extras, use a mesma lógica de get_token do seu JWTTokenSerializer:
-        refresh = RefreshToken.for_user(user)
-        access = refresh.access_token
+        adotante = Adotante.objects.create(
+            user=user,
+            **validated_data,
+        )
 
-        return {
-            "refresh": str(refresh),
-            "access": str(access),
-            "email": user.email,
-            "user_id": user.pk,
-        }
+        return adotante
+
+
+class RegisterTutorSerializer(serializers.Serializer):
+    # dados de login
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True, min_length=6)
+
+    # dados do perfil Tutor
+    nome = serializers.CharField(max_length=100)
+    cpf = serializers.CharField(max_length=11)
+    telefone = serializers.CharField(max_length=15)
+    ong_id = serializers.IntegerField()
+
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Já existe um usuário com esse e-mail.")
+        return value
+
+    def validate_ong_id(self, value):
+        if not Ong.objects.filter(pk=value).exists():
+            raise serializers.ValidationError("ONG não encontrada.")
+        return value
+
+    def create(self, validated_data):
+        email = validated_data.pop("email")
+        password = validated_data.pop("password")
+        ong_id = validated_data.pop("ong_id")
+
+        user = User.objects.create_user(
+            email=email,
+            password=password,
+            role=User.Role.TUTOR,
+        )
+
+        ong = Ong.objects.get(pk=ong_id)
+
+        tutor = Tutor.objects.create(
+            user=user,
+            ong=ong,
+            **validated_data,  # nome, cpf, telefone
+        )
+
+        return tutor
