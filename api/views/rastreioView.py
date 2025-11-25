@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from django.shortcuts import get_object_or_404
 
 from drf_spectacular.utils import extend_schema, OpenApiResponse
@@ -14,7 +14,7 @@ from api.serializers.rastreioSerializer import (
 
 
 class RastreioView(APIView):
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    permission_classes = [AllowAny]
 
     @extend_schema(
         description="Lista todos os rastreios.",
@@ -47,7 +47,7 @@ class RastreioView(APIView):
 
 
 class RastreioDetailView(APIView):
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    permission_classes = [AllowAny]
 
     @extend_schema(
         description="Busca um rastreio pelo ID.",
@@ -96,11 +96,11 @@ class RastreioDetailView(APIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        
+
 
 class RastreioPorPet(APIView):
-      permission_classes = [IsAuthenticated, IsAdminUser]
-   
+      permission_classes = [AllowAny]
+
       @extend_schema(
          description="Lista todos os rastreios de um pet específico.",
          responses={200: RastreioReadSerializer(many=True)},

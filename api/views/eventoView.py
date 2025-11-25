@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from django.shortcuts import get_object_or_404
 
 from drf_spectacular.utils import extend_schema, OpenApiResponse
@@ -14,7 +14,7 @@ from api.serializers.eventoSerializer import (
 
 
 class EventoView(APIView):
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    permission_classes = [AllowAny]
 
     @extend_schema(
         description="Lista todos os eventos.",
@@ -30,7 +30,7 @@ class EventoView(APIView):
 
     @extend_schema(
         description="Cria um evento.",
-        request=EventoWriteSerializer,  
+        request=EventoWriteSerializer,
         responses={
             201: EventoReadSerializer,
             400: OpenApiResponse(description="Erro de validação"),
@@ -47,7 +47,7 @@ class EventoView(APIView):
 
 
 class EventoDetailView(APIView):
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    permission_classes = [AllowAny]
 
     @extend_schema(
         description="Busca um evento pelo ID.",
@@ -63,7 +63,7 @@ class EventoDetailView(APIView):
 
     @extend_schema(
         description="Atualiza completamente um evento.",
-        request=EventoWriteSerializer,  
+        request=EventoWriteSerializer,
         responses={200: EventoReadSerializer, 400: OpenApiResponse(description="Erro de validação")},
     )
     def put(self, request, pk):

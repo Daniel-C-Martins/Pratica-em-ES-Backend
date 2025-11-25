@@ -55,7 +55,7 @@ class AdotanteView(APIView):
 
 
 class AdotanteDetailView(APIView):
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    permission_classes = [AllowAny]
 
     @extend_schema(
         description="Busca um adotante pelo ID.",
@@ -100,6 +100,25 @@ class AdotanteDetailView(APIView):
         adotante = get_object_or_404(Adotante, pk=pk)
         adotante.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class AdotantePorUsuarioView(APIView):
+    permission_classes = [AllowAny]
+
+    @extend_schema(
+        description="Busca um adotante pelo ID do usuário.",
+        responses={
+            200: AdotanteReadSerializer,
+            404: OpenApiResponse(description="Não encontrado"),
+        },
+    )
+    def get(self, request, user_id):
+        try:
+            adotante = get_object_or_404(Adotante, user_id=user_id)
+            serializer = AdotanteReadSerializer(adotante)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class RegisterAdotanteView(APIView):

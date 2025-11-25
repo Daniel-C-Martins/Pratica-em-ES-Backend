@@ -14,6 +14,9 @@ class RacasPet(models.Model):
 
     class Meta:
         db_table = "racas_pet"
+        indexes = [
+            models.Index(fields=['especie'], name='racas_especie_idx'),
+        ]
 
     def __str__(self):
         return f"{self.raca}"

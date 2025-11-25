@@ -91,6 +91,15 @@ class Pet(models.Model):
                 ),
             )
         ]
+        indexes = [
+            models.Index(fields=['especie'], name='pet_especie_idx'),
+            models.Index(fields=['raca'], name='pet_raca_idx'),
+            models.Index(fields=['porte'], name='pet_porte_idx'),
+            models.Index(fields=['sexo'], name='pet_sexo_idx'),
+            models.Index(fields=['status_pet'], name='pet_status_idx'),
+            models.Index(fields=['tutor'], name='pet_tutor_idx'),
+            models.Index(fields=['ong'], name='pet_ong_idx'),
+        ]
 
     @property
     def owner(self):

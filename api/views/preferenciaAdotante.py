@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from django.shortcuts import get_object_or_404
 
 from drf_spectacular.utils import extend_schema, OpenApiResponse
@@ -14,7 +14,7 @@ from api.serializers.preferenciaAdotanteSerializer import (
 
 
 class PreferenciaAdotanteView(APIView):
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    permission_classes = [AllowAny]
 
     @extend_schema(
         description="Lista todas as preferências de adotantes.",
@@ -30,7 +30,7 @@ class PreferenciaAdotanteView(APIView):
 
     @extend_schema(
         description="Cria uma preferência de adotante.",
-        request=PreferenciaAdotanteWriteSerializer,  
+        request=PreferenciaAdotanteWriteSerializer,
         responses={
             201: PreferenciaAdotanteReadSerializer,
             400: OpenApiResponse(description="Erro de validação"),
@@ -47,7 +47,7 @@ class PreferenciaAdotanteView(APIView):
 
 
 class PreferenciaAdotanteDetailView(APIView):
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    permission_classes = [AllowAny]
 
     @extend_schema(
         description="Busca uma preferência de adotante pelo ID.",
@@ -63,7 +63,7 @@ class PreferenciaAdotanteDetailView(APIView):
 
     @extend_schema(
         description="Atualiza completamente uma preferência de adotante.",
-        request=PreferenciaAdotanteWriteSerializer,  
+        request=PreferenciaAdotanteWriteSerializer,
         responses={200: PreferenciaAdotanteReadSerializer, 400: OpenApiResponse(description="Erro de validação")},
     )
     def put(self, request, pk):
@@ -88,5 +88,24 @@ class PreferenciaAdotanteDetailView(APIView):
             preferencia = get_object_or_404(PreferenciaAdotante, pk=pk)
             preferencia.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PreferenciaPorUsuarioView(APIView):
+    permission_classes = [AllowAny]
+
+    @extend_schema(
+        description="Busca preferências de adotante pelo ID do usuário.",
+        responses={
+            200: PreferenciaAdotanteReadSerializer(many=True),
+            404: OpenApiResponse(description="Não encontrado"),
+        },
+    )
+    def get(self, request, user_id):
+        try:
+            preferencias = PreferenciaAdotante.objects.filter(adotante__user_id=user_id)
+            serializer = PreferenciaAdotanteReadSerializer(preferencias, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)

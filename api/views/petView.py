@@ -102,7 +102,7 @@ class PetView(APIView):
 
 
 class PetDetailView(APIView):
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    permission_classes = [AllowAny]
 
     @extend_schema(
         description="Busca um pet pelo ID.",
@@ -154,7 +154,7 @@ class PetDetailView(APIView):
 
 
 class PetHeuristicaView(APIView):
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    permission_classes = [AllowAny]
 
     @extend_schema(
         description="Aplica a heurística para sugerir pets para o adotante.",
@@ -177,7 +177,7 @@ class PetHeuristicaView(APIView):
 
 
 class PetPorTutorView(APIView):
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    permission_classes = [AllowAny]
 
     @extend_schema(
         description="Lista todos os pets de um tutor específico.",

@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from django.shortcuts import get_object_or_404
 
 from drf_spectacular.utils import extend_schema, OpenApiResponse
@@ -14,7 +14,7 @@ from api.serializers.ongSerializer import (
 
 
 class OngView(APIView):
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    permission_classes = [AllowAny]
 
     @extend_schema(
         description="Lista todas as ONGs.",
@@ -30,7 +30,7 @@ class OngView(APIView):
 
     @extend_schema(
         description="Cria uma ONG.",
-        request=OngWriteSerializer,  
+        request=OngWriteSerializer,
         responses={
             201: OngReadSerializer,
             400: OpenApiResponse(description="Erro de validação"),
@@ -47,7 +47,7 @@ class OngView(APIView):
 
 
 class OngDetailView(APIView):
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    permission_classes = [AllowAny]
 
     @extend_schema(
         description="Busca uma ONG pelo ID.",
@@ -63,7 +63,7 @@ class OngDetailView(APIView):
 
     @extend_schema(
         description="Atualiza completamente uma ONG.",
-        request=OngWriteSerializer,  
+        request=OngWriteSerializer,
         responses={200: OngReadSerializer, 400: OpenApiResponse(description="Erro de validação")},
     )
     def put(self, request, pk):

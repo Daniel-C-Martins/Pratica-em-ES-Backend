@@ -2,7 +2,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
 from django.shortcuts import get_object_or_404
 
 from drf_spectacular.utils import extend_schema, OpenApiResponse
@@ -16,7 +16,7 @@ from api.serializers.adocaoSerializer import (
 
 class AdocaoView(APIView):
 
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    permission_classes = [AllowAny]
 
     @extend_schema(
         description="Lista todas as adoções.",
@@ -50,7 +50,7 @@ class AdocaoView(APIView):
 
 
 class AdocaoDetailView(APIView):
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    permission_classes = [AllowAny]
 
     @extend_schema(
         description="Busca uma adoção pelo ID.",
@@ -66,7 +66,7 @@ class AdocaoDetailView(APIView):
 
     @extend_schema(
         description="Atualiza completamente uma adoção.",
-        request=AdocaoWriteSerializer,         
+        request=AdocaoWriteSerializer,
         responses={200: AdocaoReadSerializer, 400: OpenApiResponse(description="Erro de validação")},
     )
     def put(self, request, pk):
