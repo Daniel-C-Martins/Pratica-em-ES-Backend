@@ -1,6 +1,11 @@
 from api.models.pet import Pet
 from api.models.statusPet import StatusPet, Status
-from api.models.preferenciaAdotante import PreferenciaAdotante, PortePet, IdadePet, SexoPet
+from api.models.preferenciaAdotante import (
+    PreferenciaAdotante,
+    PortePet,
+    IdadePet,
+    SexoPet,
+)
 from api.models.adotante import Adotante
 from django.db.models import Case, When, Value, F
 from django.db.models.fields import IntegerField
@@ -21,10 +26,13 @@ class HeuristicaService:
         if not preferencias:
             print("Preferências do adotante não encontradas ou inativas.")
             return []
-        
+
         status_pet_disponivel = StatusPet.objects.get(status=Status.DISPONIVEL)
 
-        filtros = {"especie": preferencias.preferencia_especie, "status_pet": status_pet_disponivel}
+        filtros = {
+            "especie": preferencias.preferencia_especie,
+            "status_pet": status_pet_disponivel,
+        }
 
         max_score = 160
 
@@ -47,13 +55,25 @@ class HeuristicaService:
             When(porte=preferencias.preferencia_porte, then=Value(40)),
         ]
         if preferencias.preferencia_porte == PortePet.MEDIO:
-            porte.append(When(porte__in=[PortePet.PEQUENO, PortePet.GRANDE], then=Value(15)))
+            porte.append(
+                When(porte__in=[PortePet.PEQUENO, PortePet.GRANDE], then=Value(15))
+            )
         elif preferencias.preferencia_porte in [PortePet.PEQUENO, PortePet.GRANDE]:
             porte.append(When(porte=PortePet.MEDIO, then=Value(15)))
         elif preferencias.preferencia_porte == PortePet.MUITO_GRANDE:
             porte.append(When(porte=PortePet.GRANDE, then=Value(15)))
         elif preferencias.preferencia_porte == PortePet.INDIFERENTE:
-            porte.append(When(porte__in=[PortePet.PEQUENO, PortePet.MEDIO, PortePet.GRANDE, PortePet.MUITO_GRANDE], then=Value(20)))
+            porte.append(
+                When(
+                    porte__in=[
+                        PortePet.PEQUENO,
+                        PortePet.MEDIO,
+                        PortePet.GRANDE,
+                        PortePet.MUITO_GRANDE,
+                    ],
+                    then=Value(20),
+                )
+            )
 
         porte_score = Case(*porte, default=Value(0), output_field=IntegerField())
 
@@ -61,15 +81,22 @@ class HeuristicaService:
             When(idade=preferencias.preferencia_idade, then=Value(40)),
         ]
         if preferencias.preferencia_idade == IdadePet.ADULTO:
-            idade.append(When(idade__in=[IdadePet.FILHOTE, IdadePet.IDOSO], then=Value(15)))
+            idade.append(
+                When(idade__in=[IdadePet.FILHOTE, IdadePet.IDOSO], then=Value(15))
+            )
         elif preferencias.preferencia_idade in [IdadePet.FILHOTE, IdadePet.IDOSO]:
             idade.append(When(idade=IdadePet.ADULTO, then=Value(15)))
         elif preferencias.preferencia_idade == IdadePet.INDIFERENTE:
-            idade.append(When(idade__in=[IdadePet.FILHOTE, IdadePet.ADULTO, IdadePet.IDOSO], then=Value(20)))
+            idade.append(
+                When(
+                    idade__in=[IdadePet.FILHOTE, IdadePet.ADULTO, IdadePet.IDOSO],
+                    then=Value(20),
+                )
+            )
 
         idade_score = Case(*idade, default=Value(0), output_field=IntegerField())
 
-        sexo = [ 
+        sexo = [
             When(sexo=preferencias.preferencia_sexo, then=Value(30)),
         ]
         if preferencias.preferencia_sexo == SexoPet.INDIFERENTE:
@@ -101,7 +128,6 @@ class HeuristicaService:
             default=Value(0),
             output_field=IntegerField(),
         )
-        
 
         pets_query = (
             Pet.objects.filter(**filtros)
@@ -118,9 +144,8 @@ class HeuristicaService:
         pets_pontuados = []
         for pet in top_pets:
             # garante que o score já venha arredondado pro serializer
-            pet.score = round(pet.score, 2)
+            pet.score = round(pet.score, 0)
             print(f"Pet ID: {pet.id_pet}, Nome: {pet.nome}, Score: {pet.score}")
             pets_pontuados.append(pet)
 
-    
         return pets_pontuados
