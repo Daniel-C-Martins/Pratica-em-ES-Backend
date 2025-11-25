@@ -91,3 +91,46 @@ class AdocaoDetailView(APIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AdocaoPorUsuarioView(APIView):
+    permission_classes = [AllowAny]
+
+    @extend_schema(
+        description="Busca todas as adoções de um usuário pelo ID do usuário.",
+        responses={
+            200: AdocaoReadSerializer(many=True),
+            404: OpenApiResponse(description="Não encontrado"),
+        },
+    )
+    def get(self, request, user_id):
+        try:
+            adocoes = Adocao.objects.filter(adotante__user_id=user_id)
+            serializer = AdocaoReadSerializer(adocoes, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PetAdotadoView(APIView):
+    permission_classes = [AllowAny]
+
+    @extend_schema(
+        description="Verifica se um pet foi adotado (status concluída).",
+        responses={
+            200: OpenApiResponse(description="Retorna se o pet foi adotado"),
+            400: OpenApiResponse(description="Erro na requisição"),
+        },
+    )
+    def get(self, request, pet_id):
+        try:
+            from api.models.adocao import StatusAdocao
+
+            adotado = Adocao.objects.filter(
+                pet_id=pet_id,
+                status=StatusAdocao.CONCLUIDA
+            ).exists()
+
+            return Response({"adotado": adotado}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)

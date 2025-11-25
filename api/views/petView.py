@@ -101,6 +101,81 @@ class PetView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
+class PetDisponivelView(APIView):
+    permission_classes = [AllowAny]
+
+    @extend_schema(
+        description="Lista apenas pets disponíveis para adoção (não adotados).",
+        parameters=[
+            OpenApiParameter(
+                name="especie",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                description="Filtra pela espécie do pet",
+            ),
+            OpenApiParameter(
+                name="raca",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                description="Filtra pela raça do pet",
+            ),
+            OpenApiParameter(
+                name="porte",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                description="Filtra pelo porte do pet",
+            ),
+            OpenApiParameter(
+                name="sexo",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                description="Filtra pelo sexo do pet",
+            ),
+        ],
+        responses={200: PetReadSerializer(many=True)},
+    )
+    def get(self, request):
+        try:
+            from api.models.adocao import Adocao, StatusAdocao
+
+            # Busca todos os pets
+            pets = Pet.objects.all()
+
+            # Exclui pets que já foram adotados (status CONCLUIDA)
+            pets_adotados_ids = Adocao.objects.filter(
+                status=StatusAdocao.CONCLUIDA
+            ).values_list('pet_id', flat=True)
+
+            pets = pets.exclude(id_pet__in=pets_adotados_ids)
+
+            especie = request.query_params.get("especie")
+            raca = request.query_params.get("raca")
+            porte = request.query_params.get("porte")
+            sexo = request.query_params.get("sexo")
+
+            if especie:
+                pets = pets.filter(especie=especie)
+
+            if raca:
+                pets = pets.filter(raca=raca)
+
+            if porte:
+                pets = pets.filter(porte=porte)
+
+            if sexo:
+                pets = pets.filter(sexo=sexo)
+
+            serializer = PetReadSerializer(pets, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
 class PetDetailView(APIView):
     permission_classes = [AllowAny]
 
