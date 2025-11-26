@@ -7,6 +7,7 @@ from api.models.preferenciaAdotante import (
     SexoPet,
 )
 from api.models.adotante import Adotante
+from api.models.adocao import Adocao, StatusAdocao
 from django.db.models import Case, When, Value, F
 from django.db.models.fields import IntegerField
 
@@ -34,7 +35,7 @@ class HeuristicaService:
             "status_pet": status_pet_disponivel,
         }
 
-        max_score = 160
+        max_score = 130
 
         if not preferencias.possui_tempo:
             filtros["cuidados_constantes"] = False
@@ -145,6 +146,8 @@ class HeuristicaService:
         for pet in top_pets:
             # garante que o score já venha arredondado pro serializer
             pet.score = round(pet.score, 0)
+            if pet.score > 100:
+                pet.score = 100
             print(f"Pet ID: {pet.id_pet}, Nome: {pet.nome}, Score: {pet.score}")
             pets_pontuados.append(pet)
 
